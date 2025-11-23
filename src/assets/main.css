@@ -1,0 +1,12 @@
+@import "tailwindcss";
+@import 'leaflet/dist/leaflet.css';
+
+@theme {
+  --color-primary: #007BFF;
+  --color-primary-contrast: #0056B3;
+  --color-primary-disabled: #B3D7FF;
+}
+
+.leaflet-popup-content p {
+  margin: 0 !important;
+}
