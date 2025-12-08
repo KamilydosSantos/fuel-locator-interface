@@ -28,5 +28,25 @@
 </template>
 
 <script setup>
+import { onMounted } from 'vue'
+import { useRoute } from 'vue-router'
+import { useToast } from 'vue-toastification'
 import LoginForm from '@/components/LoginForm.vue'
+
+const route = useRoute()
+const toast = useToast()
+
+onMounted(() => {
+  if (route.query.reset === 'success') {
+    toast.success(
+      'Senha redefinida com sucesso! Agora você pode entrar com sua nova senha.'
+    )
+  }
+
+  if (route.query.register === 'success') {
+    toast.success(
+      'Conta criada com sucesso! Faça login para continuar.'
+    )
+  }
+})
 </script>

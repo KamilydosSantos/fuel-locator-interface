@@ -1,56 +1,76 @@
 <template>
-  <div class="flex-1 bg-white p-2 rounded-3xl shadow-lg">
-    <label class="block mb-1 text-sm font-medium text-gray-700 pl-2">Combustível</label>
-    <select
-      v-model="fuelId"
-      class="w-full h-10 p-2.5 pr-8 rounded-2xl bg-white text-gray-800 border border-gray-200 shadow-sm
-            focus:outline-none cursor-pointer"
-    >
-      <option v-for="fuel in fuels" :key="fuel.id" :value="fuel.id">
-        {{ fuel.name }}
-      </option>
-    </select>
-  </div>
+  <div class="w-full flex flex-col md:flex-row gap-1 md:gap-2">
 
-  <div class="flex-3 bg-white p-2 rounded-3xl relative shadow-lg">
-    <label class="block mb-1 text-sm font-medium text-gray-700 pl-2">Cidade</label>
-    <input
-      type="text"
-      v-model="cityQuery"
-      @input="fetchCities"
-      class="w-full h-10 p-2.5 rounded-2xl bg-white text-gray-800 border border-gray-200 shadow-sm focus:outline-none"
-      placeholder="Digite o nome da cidade"
-    />
+    <div class="flex-1 bg-white p-1.5 md:p-2 rounded-2xl md:rounded-3xl shadow-lg order-2 md:order-none">
+      <label class="block mb-0.5 md:mb-1 text-xs md:text-sm font-medium text-gray-700 pl-1 md:pl-2">
+        Combustível
+      </label>
 
-    <ul
-      v-if="cityOptions.length"
-      class="absolute z-10 border border-primary bg-white rounded-xl mt-1 max-h-48 overflow-auto"
-      style="width: calc(100% - 32px) !important;"
-    >
-      <li
-        v-for="city in cityOptions"
-        :key="city.id"
-        class="p-2 hover:bg-gray-100 text-sm"
-        @click="handleSelectCity(city)"
+      <select
+        v-model="fuelId"
+        class="w-full h-9 md:h-10 text-xs md:text-sm p-2 md:p-2.5 pr-6 md:pr-8 rounded-2xl bg-white
+               text-gray-800 border border-gray-200 shadow-sm focus:outline-none cursor-pointer"
       >
-        {{ city.name }}
-      </li>
-    </ul>
-  </div>
+        <option v-for="fuel in fuels" :key="fuel.id" :value="fuel.id">
+          {{ fuel.name }}
+        </option>
+      </select>
+    </div>
 
-  <div class="flex-1 bg-white p-2 rounded-3xl shadow-lg flex flex-col gap-1">
-    <label class="block mb-1 text-sm font-medium text-gray-700 pl-2">
-      Raio de busca <span class="bg-primary p-1 rounded-md text-xs text-white"> {{ searchRadius }} km</span>
-    </label>
-    <input
-      type="range"
-      v-model="searchRadius"
-      :min="MIN_RADIUS"
-      :max="MAX_RADIUS"
-      step="5"
-      class="w-full accent-primary cursor-pointer"
-    />
-    <p class="w-full flex justify-between text-xs text-gray-700 px-2"><span>5 km</span><span>100 km</span></p>
+    <div class="flex-3 bg-white p-1.5 md:p-2 rounded-2xl md:rounded-3xl relative shadow-lg order-1 md:order-none">
+      <label class="block mb-0.5 md:mb-1 text-xs md:text-sm font-medium text-gray-700 pl-1 md:pl-2">
+        Cidade
+      </label>
+
+      <input
+        type="text"
+        v-model="cityQuery"
+        @input="fetchCities"
+        class="w-full h-9 md:h-10 text-xs md:text-sm p-2 md:p-2.5 rounded-2xl bg-white text-gray-800
+               border border-gray-200 shadow-sm focus:outline-none"
+        placeholder="Digite o nome da cidade"
+      />
+
+      <ul
+        v-if="cityOptions.length"
+        class="absolute z-10 border border-primary bg-white rounded-xl mt-1 max-h-40 md:max-h-48 overflow-auto
+               text-xs md:text-sm"
+        style="width: calc(100% - 16px) !important;"
+      >
+        <li
+          v-for="city in cityOptions"
+          :key="city.id"
+          class="p-2 hover:bg-gray-100"
+          @click="handleSelectCity(city)"
+        >
+          {{ city.name }} ({{ city.state }})
+        </li>
+      </ul>
+    </div>
+
+    <div class="flex-1 bg-white p-1.5 md:p-2 rounded-2xl md:rounded-3xl shadow-lg flex flex-col gap-0.5 md:gap-1
+                order-3 md:order-none">
+      <label class="block mb-0.5 md:mb-1 text-xs md:text-sm font-medium text-gray-700 pl-1 md:pl-2">
+        Raio de busca
+        <span class="bg-primary p-0.5 md:p-1 rounded-md text-[10px] md:text-xs text-white">
+          {{ searchRadius }} km
+        </span>
+      </label>
+
+      <input
+        type="range"
+        v-model="searchRadius"
+        :min="MIN_RADIUS"
+        :max="MAX_RADIUS"
+        step="5"
+        class="w-full accent-primary cursor-pointer"
+      />
+
+      <p class="w-full flex justify-between text-[10px] md:text-xs text-gray-700 px-1 md:px-2">
+        <span>5 km</span><span>100 km</span>
+      </p>
+    </div>
+
   </div>
 </template>
 

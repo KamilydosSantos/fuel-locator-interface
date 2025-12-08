@@ -248,6 +248,22 @@ const filteredSuggestions = computed(() => {
 })
 
 onMounted(async () => {
+  if (route.query.edited === "success") {
+    toast.success("Sugestão atualizada com sucesso!");
+
+    router.replace({
+      query: { ...route.query, edited: undefined },
+    });
+  }
+
+  if (route.query.edited === "error") {
+    toast.error("Não foi possível atualizar a sugestão. Tente novamente.");
+
+    router.replace({
+      query: { ...route.query, edited: undefined },
+    });
+  }
+
   if (route.query.f1 !== undefined) {
     filters.value[1] = route.query.f1 == 1
     filters.value[2] = route.query.f2 == 1
@@ -263,7 +279,7 @@ onMounted(async () => {
   } finally {
     isLoading.value = false
   }
-})
+});
 
 function formatDate(date) {
   return new Date(date).toLocaleString('pt-BR', {

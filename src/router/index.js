@@ -157,6 +157,7 @@ router.beforeEach((to, from, next) => {
   }
 
   if (to.name === 'login' && isAuthenticated) {
+    if (user.role_id === 1) return next('/admin-panel')
     return next('/map')
   }
 

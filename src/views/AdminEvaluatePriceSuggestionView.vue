@@ -46,7 +46,7 @@
             R$ {{ formatPrice(suggestion.fuel_price.price) }}
           </span>
           <span v-else>
-            Nenhum preço foi cadastrado ainda.
+            Sem atualizações de preço.
           </span>
         </p>
       </section>
@@ -90,6 +90,9 @@ import { ref, computed, onMounted } from 'vue'
 import { api } from '@/services/api'
 import { useRoute, useRouter } from 'vue-router'
 import { ArrowLeft } from 'lucide-vue-next'
+import { useToast } from 'vue-toastification'
+
+const toast = useToast()
 
 const route = useRoute()
 const router = useRouter()
@@ -109,23 +112,55 @@ const fetchSuggestion = async () => {
     console.log(suggestion.value)
   } catch (e) {
     console.error('Erro ao carregar sugestão', e)
+
+    toast.error(
+      e.response?.data?.message ||
+      'Erro ao carregar a sugestão de preço.'
+    )
   } finally {
     loading.value = false
   }
 }
 
 const cancel = () => {
-  router.push({ name: 'manageCollaborationRequests' })
+  router.push({ name: 'managePriceSuggestions' })
 }
 
 const approveSuggestion = async () => {
-  await api.patch(`/fuel-price-suggestions/${id}/approve`)
-  router.push({ name: 'managePriceSuggestions' })
+  try {
+    await api.patch(`/fuel-price-suggestions/${id}/approve`)
+
+    router.push({
+      name: 'managePriceSuggestions',
+        query: { success: "success" 
+      }
+    })
+  } catch (e) {
+    console.error(e)
+
+    toast.error(
+      e.response?.data?.message ||
+      'Erro ao aprovar a sugestão.'
+    )
+  }
 }
 
 const rejectSuggestion = async () => {
-  await api.patch(`/fuel-price-suggestions/${id}/reject`)
-  router.push({ name: 'managePriceSuggestions' })
+  try {
+    await api.patch(`/fuel-price-suggestions/${id}/reject`)
+    router.push({
+      name: 'managePriceSuggestions',
+        query: { success: "success" 
+      }
+    })
+ } catch (e) {
+    console.error(e)
+
+    toast.error(
+      e.response?.data?.message ||
+      'Erro ao rejeitar a sugestão.'
+    )
+  }
 }
 
 const photoUrl = computed(() => {

@@ -1,23 +1,39 @@
 <template>
   <div
-    class="absolute top-[110px] right-8 bg-white rounded-2xl shadow-lg p-4 w-80 h-max z-50"
+    class="absolute top-20 md:top-[110px] right-8
+           bg-white rounded-xl md:rounded-2xl
+           shadow-lg
+           p-4 md:p-5
+           w-[92vw] max-w-[20rem] md:w-80
+           h-max z-50"
   >
-    <h2 class="text-lg font-semibold text-primary mb-1">Bem-vindo!</h2>
+    <h2 class="text-lg md:text-lg font-semibold text-primary mb-1">
+      Bem-vindo!
+    </h2>
+
     <button
       @click="$emit('close')"
-      class="h-10 w-10 absolute p-2 top-2 right-2 text-sm text-gray-400 hover:text-gray-700 font-bold hover:bg-gray-200 rounded-4xl"
+      class="absolute top-2 right-2
+             h-9 w-9 md:h-10 md:w-10
+             text-gray-400 hover:text-gray-700
+             hover:bg-gray-200 rounded-full
+             flex items-center justify-center"
     >
       ✕
     </button>
 
-    <p class="text-gray-600 text-sm">
+    <p class="text-gray-600 text-sm md:text-sm">
       Olá, <span class="font-semibold">{{ userName }}</span>
     </p>
 
-    <div class="mt-2 flex flex-col gap-2">
+    <div class="mt-4 flex flex-col gap-2.5">
       <button
         v-if="userRole === 2"
-        class="w-full text-sm bg-primary text-white py-2 rounded-xl hover:opacity-90"
+        class="w-full bg-primary text-white
+               py-2
+               text-sm
+               rounded-xl
+               hover:opacity-90"
         @click="requestCollaborator"
       >
         Solicitar para ser colaborador
@@ -25,14 +41,23 @@
 
       <button
         v-if="userRole === 3"
-        class="w-full text-sm bg-primary text-white py-2 rounded-xl hover:opacity-90"
+        class="w-full bg-primary text-white
+               py-2
+               text-sm
+               rounded-xl
+               hover:opacity-90"
         @click="goToPriceManagement"
       >
         Gerenciar indicações de preço
       </button>
 
       <button
-        class="w-full text-sm text-red-500 py-2 rounded-xl hover:bg-red-50 border border-gray-200 hover:border-red-500"
+        class="w-full text-red-500
+               py-2
+               text-sm
+               rounded-xl
+               border border-gray-200
+               hover:bg-red-50 hover:border-red-500"
         @click="logout"
       >
         Sair
@@ -67,6 +92,10 @@ function goToPriceManagement() {
 }
 
 async function logout() {
+  const confirmed = window.confirm('Tem certeza que deseja sair do sistema?')
+
+  if (!confirmed) return
+
   try {
     await api.post('/logout')
 

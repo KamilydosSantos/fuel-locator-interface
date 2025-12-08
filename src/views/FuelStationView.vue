@@ -17,10 +17,9 @@
     <div class="w-full max-w-2xl mx-auto border border-gray-100 bg-white shadow-md rounded-xl p-4">
       <div v-if="loading" class="text-center text-gray-500">Carregando informações do posto...</div>
       <div v-else-if="station">
-        <!-- Cabeçalho -->
         <div class="mb-6">
           <h1 class="text-2xl font-bold text-gray-800">{{ station?.name === 'Unnamed Station' ? 'Posto sem Nome' : station?.name }}</h1>
-          <p class="text-gray-600">{{ station.flag || 'Bandeira Branca' }}</p>
+          <p class="text-gray-600">{{ station.brand || 'Bandeira Branca' }}</p>
           <div class="mt-1 flex items-align gap-2">
             <p class="text-gray-700">{{ station.address.street }}, {{ station.address.number }} — {{ station.address.neighborhood }} — {{ station.address.city?.name || '' }}</p>
             <a
@@ -35,21 +34,33 @@
 
         <hr class="my-4 border-gray-200">
 
-        <div>
-          <h2 class="text-lg font-semibold text-gray-700 mb-2">Combustíveis disponíveis</h2>
+        <div v-if="hasValidFuelPrices">
+          <h2 class="text-lg font-semibold text-gray-700 mb-2">
+            Combustíveis disponíveis
+          </h2>
+
           <ul class="space-y-2">
             <li
-              v-for="fuel in station.fuel_prices.filter(f => f.price > 0)"
+              v-for="fuel in station.fuel_prices.filter(f => f.is_valid)"
               :key="fuel.fuel.id"
-              class=" bg-white p-3 rounded-lg shadow-sm border border-gray-100"
+              class="bg-white p-3 rounded-lg shadow-sm border border-gray-100"
             >
               <div class="flex justify-between items-center">
                 <span class="font-medium">{{ fuel.fuel.name }}</span>
-                <span class="font-bold text-primary">R$ {{ formatPrice(fuel.price) }}</span>
+                <span class="font-bold text-primary">
+                  R$ {{ formatPrice(fuel.price) }}
+                </span>
               </div>
-              <p class="w-full text-end italic text-xs text-gray-700 mt-2">Última atualização em: {{ formatDate(fuel.updated_at) }}</p>
+
+              <p class="w-full text-end italic text-xs text-gray-700 mt-2">
+                Última atualização em: {{ formatDate(fuel.updated_at) }}
+              </p>
             </li>
           </ul>
+        </div>
+
+        <div v-else class="text-sm text-gray-500 italic text-center py-4">
+          Este posto não possui nenhum preço de combustível válido no momento.
         </div>
       </div>
       <div v-else class="text-red-500 text-center">Não foi possível carregar as informações do posto.</div>
@@ -58,7 +69,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from "vue-router";
 import { api } from '@/services/api.js';
 import { ArrowLeft } from "lucide-vue-next";
@@ -70,12 +81,22 @@ const toast = useToast();
 const station = ref(null);
 const loading = ref(true);
 
+const hasValidFuelPrices = computed(() =>
+  !!station.value?.fuel_prices?.some(f => Number(f.is_valid) === 1)
+)
+
 const fetchStation = async () => {
   try {
     const { data } = await api.get(`/stations/${route.params.id}`, {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
     });
     station.value = data.data;
+
+    if (station.value?.fuel_prices) {
+      station.value.fuel_prices.sort((a, b) =>
+        a.fuel.name.localeCompare(b.fuel.name, 'pt-BR')
+      );
+    }
   } catch (err) {
     console.error('Erro ao buscar posto:', err);
     toast.error('Não foi possível carregar as informações do posto.');

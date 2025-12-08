@@ -39,7 +39,6 @@
         </select>
       </div>
 
-      <!-- Preço -->
       <div class="mb-4">
         <label class="text-sm font-medium text-gray-700">Preço (R$)</label>
         <input
@@ -101,7 +100,6 @@
       </div>
     </div>
   </div>
-  <!-- Modal -->
   <CameraModal
     v-if="showCamera"
     @close="showCamera = false"
@@ -205,8 +203,14 @@ const submit = async () => {
 
     router.push({ name: "map", query: { success: "suggestion_sent" } });
   } catch (e) {
-    console.error(e);
-    alert("Erro ao enviar sugestão!");
+    console.error(e)
+
+    router.push({
+      name: "map",
+      query: {
+        error: "suggestion_failed",
+      },
+    });
   } finally {
     loading.value = false;
   }

@@ -16,9 +16,21 @@
     </div>
 
     <div v-else class="w-full max-w-2xl bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
-      <p class="text-gray-600 mb-6">
-        Preencha seus dados para que o administrador possa aprovar sua solicitação.
-      </p>
+      <div class="text-gray-600 mb-6 space-y-2">
+        <p>
+          Ao se tornar um <span class="font-semibold">colaborador</span>, você poderá
+          contribuir com o aplicativo sugerindo <span class="font-semibold">preços de combustíveis</span>
+          nos postos da sua região.
+        </p>
+
+        <p>
+          Suas contribuições ajudarão outros usuários a encontrar os melhores preços e a manter nossas informações sempre atualizadas.
+        </p>
+
+        <p class="text-xs text-gray-500 pt-4">
+          Preencha seus dados abaixo para que o administrador possa analisar e aprovar sua solicitação.
+        </p>
+      </div>
 
       <InputField
         placeholder="(11) 99999-9999"
@@ -119,10 +131,22 @@ const submitRequest = async () => {
   try {
     await api.post("/role-requests/submit", { phone: form.value.phone, cpf: form.value.cpf });
     success.value = true;
-    router.push({ name: "map", query: { success: "request_sent" }});
+    
+    router.push({ 
+      name: "map", 
+      query: { 
+        success: "request_sent" 
+      },
+    });
   } catch (e) {
-    console.error(e);
-    error.value = true;
+    console.error(e)
+
+    router.push({
+      name: "map",
+      query: {
+        error: "request_failed",
+      },
+    });
   } finally {
     loading.value = false;
   }

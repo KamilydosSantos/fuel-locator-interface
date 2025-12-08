@@ -209,13 +209,20 @@ const updateSuggestion = async () => {
       name: "priceSuggestions",
       query: {
         ...route.query,
-        updated: "true",
+        edited: "success",
       },
     });
 
   } catch (e) {
     console.error(e);
-    alert("Erro ao salvar alterações.");
+
+    router.push({
+      name: "priceSuggestions",
+      query: {
+        ...route.query,
+        edited: "edit_suggestion_failed",
+      },
+    })
   } finally {
     loading.value = false;
   }

@@ -1,21 +1,23 @@
 <template>
   <div class="h-screen overflow-y-auto bg-white p-4 border-r border-gray-200">
-    <h2 class="text-lg font-semibold mb-4 text-gray-800">Postos encontrados</h2>
-
     <div class="mb-4 flex items-center gap-2">
       <label for="sort" class="text-gray-700 text-sm whitespace-nowrap font-medium">Ordenar por:</label>
       <select
-        id="sort"
         v-model="sortOption"
-        class="flex-1 h-9 p-1 pr-8 rounded-2xl bg-white text-gray-800 border border-gray-200 shadow-sm focus:outline-none cursor-pointer text-sm"
+        :disabled="!locationAllowed"
+        class="flex-1 h-9 p-1 pr-8 rounded-2xl bg-white text-gray-800 border border-gray-200 shadow-sm
+              focus:outline-none cursor-pointer text-sm
+              disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <option value="price">Menor preço</option>
-        <option value="distance">Menor distância</option>
+        <option value="distance" :disabled="!locationAllowed">
+          Menor distância
+        </option>
       </select>
     </div>
 
-    <div v-if="!sortedStations.length" class="text-gray-500 text-sm">
-      Nenhum posto encontrado.
+    <div v-if="!sortedStations.length" class="text-gray-500 text-sm text-center">
+      Nenhum posto encontrado com preços atualizados deste combustível.
     </div>
 
     <ul v-else>
@@ -29,8 +31,13 @@
             <h3 class="font-semibold text-gray-900 text-base text-sm">
             {{ station?.name === 'Unnamed Station' ? 'Posto sem Nome' : station?.name }} - {{ station.brand || 'Bandeira Branca' }}
             </h3>
-            <div v-if="station.distance" class="text-xs font-bold text-gray-500">
-              {{ station.distance.toFixed(1) }} km
+            <div v-if="locationAllowed" class="whitespace-nowrap text-xs font-bold text-gray-500">
+              <template v-if="station.distanceLoading">
+                — km
+              </template>
+              <template v-else-if="station.distance != null">
+                {{ station.distance.toFixed(1) }} km
+              </template>
             </div>
           </div>
 
@@ -64,13 +71,19 @@ const props = defineProps({
   stations: {
     type: Array,
     default: () => []
+  },
+  locationAllowed: {
+    type: Boolean,
+    default: true
   }
 })
 
 const sortOption = ref('price')
 
 const sortedStations = computed(() => {
-  const list = [...props.stations]
+  const list = props.stations.filter(
+    station => station.fuel_prices && station.fuel_prices.length > 0
+  )
 
   if (sortOption.value === 'distance') {
     return list.sort(

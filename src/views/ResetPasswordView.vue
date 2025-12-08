@@ -74,7 +74,6 @@
           </button>
 
           <p v-if="error" class="text-red-500 text-sm mt-3">{{ error }}</p>
-          <p v-if="success" class="text-green-600 text-sm mt-3">{{ success }}</p>
         </div>
       </div>
     </div>
@@ -124,8 +123,10 @@ const handleConfirm = async () => {
       password_confirmation: confirmPassword.value
     })
 
-    success.value = data.message || 'Senha redefinida com sucesso!'
-    setTimeout(() => router.push('/login'), 2000)
+    router.push({
+      name: 'login',
+      query: { reset: 'success' }
+    })
   } catch (err) {
     error.value = err.response?.data?.message || 'Erro ao redefinir senha. Tente novamente.'
   }

@@ -22,7 +22,6 @@
       Nenhuma sugestão de preço pendente no momento.
     </div>
 
-    <!-- LISTA -->
     <div v-else class="flex flex-col gap-4">
       <div
         v-for="item in suggestions"
@@ -86,10 +85,13 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { api } from '@/services/api'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { ArrowLeft } from 'lucide-vue-next'
+import { useToast } from "vue-toastification"
 
+const toast = useToast()
 const router = useRouter()
+const route = useRoute()
 
 const suggestions = ref([])
 const loading = ref(true)
@@ -108,6 +110,10 @@ const fetchSuggestions = async () => {
     suggestions.value = data.data || data
   } catch (e) {
     console.error('Erro ao carregar sugestões', e)
+    toast.error(
+      e.response?.data?.message ||
+      "Erro ao carregar sugestões de preço pendentes."
+    )
   } finally {
     loading.value = false
   }
@@ -117,5 +123,12 @@ const goToEvaluate = (id) => {
   router.push({ name: 'adminEvaluatePriceSuggestion', params: { id } })
 }
 
-onMounted(fetchSuggestions)
+onMounted(() => {
+  if (route.query.success === 'success') {
+    toast.success('Decisão registrada com sucesso! A notificação será enviada ao colaborador.')
+    router.replace({ query: {} })
+  }
+
+  fetchSuggestions()
+})
 </script>

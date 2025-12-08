@@ -119,7 +119,10 @@ const handleRegister = async () => {
       password_confirmation: password_confirmation.value,
     })
 
-    router.push('/login')
+    router.push({
+      name: 'login',
+      query: { register: 'success' }
+    })
   } catch (e) {
     console.error(e)
 

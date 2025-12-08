@@ -1,51 +1,67 @@
-import { ref, onMounted } from 'vue';
-import L from 'leaflet';
+import { ref } from 'vue'
+import L from 'leaflet'
 
-export function useMap(onMapReady) {
-  const map = ref(null);
-  const userLocation = ref(null);
-
-  const BRAZIL_CENTER = [-14.235, -51.9253];
-  const BRAZIL_ZOOM = 4.5;
+export function useMap() {
+  const map = ref(null)
+  const userMarker = ref(null)
 
   const setupTileLayer = (instance) => {
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors',
-    }).addTo(instance);
-  };
+    }).addTo(instance)
+  }
 
   const initializeWithCoords = (lat, lng, zoomLevel = 14) => {
-    const instance = L.map('map', { zoomControl: false }).setView([lat, lng], zoomLevel);
-    setupTileLayer(instance);
-    map.value = instance;
-    userLocation.value = { lat, lng };
-    onMapReady?.(lat, lng);
-  };
+    const container = document.getElementById('map')
 
-  const initializeBrazilFallback = () => {
-    initializeWithCoords(BRAZIL_CENTER[0], BRAZIL_CENTER[1], BRAZIL_ZOOM);
-  };
+    if (map.value && container) {
+      map.value.setView([lat, lng], zoomLevel)
+      updateUserMarker(lat, lng)
+      return
+    }
 
-  onMounted(() => {
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const { latitude, longitude } = pos.coords;
-        const defaultRadius = 10;
-        const zoomLevel = radiusToZoom(defaultRadius);
-        initializeWithCoords(latitude, longitude, zoomLevel);
-      },
-      () => initializeBrazilFallback(),
-      { enableHighAccuracy: true }
-    );
-  });
+    if (map.value) {
+      map.value.remove()
+      map.value = null
+    }
 
-  const radiusToZoom = (radiusKm) => {
-    if (radiusKm <= 5) return 14;
-    if (radiusKm <= 10) return 13;
-    if (radiusKm <= 20) return 12;
-    if (radiusKm <= 50) return 11;
-    return 10;
-  };
+    const instance = L.map('map', { zoomControl: false })
+      .setView([lat, lng], zoomLevel)
 
-  return { map, userLocation, initializeWithCoords, radiusToZoom };
+    setupTileLayer(instance)
+    map.value = instance
+
+    updateUserMarker(lat, lng)
+  }
+
+  const updateUserMarker = (lat, lng) => {
+    if (!map.value) return
+
+    if (userMarker.value) {
+      userMarker.value.setLatLng([lat, lng])
+      return
+    }
+
+    userMarker.value = L.circleMarker([lat, lng], {
+      radius: 7,
+      weight: 3,
+      fillOpacity: 0.7,
+      color: '#1d4ed8',
+      fillColor: '#3b82f6'
+    }).addTo(map.value)
+  }
+
+  const destroyMap = () => {
+    if (map.value) {
+      map.value.remove()
+      map.value = null
+      userMarker.value = null
+    }
+  }
+
+  return {
+    map,
+    initializeWithCoords,
+    destroyMap
+  }
 }

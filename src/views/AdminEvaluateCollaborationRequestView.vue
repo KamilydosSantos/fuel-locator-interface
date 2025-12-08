@@ -72,6 +72,9 @@ import { ref, computed, onMounted } from 'vue'
 import { api } from '@/services/api'
 import { useRoute, useRouter } from 'vue-router'
 import { ArrowLeft } from 'lucide-vue-next'
+import { useToast } from 'vue-toastification'
+
+const toast = useToast()
 
 const route = useRoute()
 const router = useRouter()
@@ -97,19 +100,51 @@ const fetchRequest = async () => {
     request.value = data.data || data
   } catch (e) {
     console.error('Erro ao carregar solicitação', e)
+
+    toast.error(
+      e.response?.data?.message ||
+      'Erro ao carregar a solicitação de colaboração.'
+    )
   } finally {
     loading.value = false
   }
 }
 
 const approveRequest = async () => {
-  await api.patch(`/role-requests/${id}/approve`)
-  router.push({ name: 'manageCollaborationRequests' })
+  try {
+    await api.patch(`/role-requests/${id}/approve`)
+
+    router.push({
+      name: 'manageCollaborationRequests',
+        query: { success: "success" 
+      }
+    })
+  } catch (e) {
+    console.error(e)
+
+    toast.error(
+      e.response?.data?.message ||
+      'Erro ao aprovar a solicitação.'
+    )
+  }
 }
 
 const rejectRequest = async () => {
-  await api.patch(`/role-requests/${id}/reject`)
-  router.push({ name: 'manageCollaborationRequests' })
+  try {
+    await api.patch(`/role-requests/${id}/reject`)
+    router.push({
+      name: 'manageCollaborationRequests',
+        query: { success: "success" 
+      }
+    })
+  } catch (e) {
+    console.error(e)
+
+    toast.error(
+      e.response?.data?.message ||
+      'Erro ao rejeitar a solicitação.'
+    )
+  }
 }
 
 const cancel = () => {
