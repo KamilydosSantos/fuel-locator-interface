@@ -3,7 +3,7 @@
     <div
       class="hidden md:block fixed left-0 top-0 h-full w-76 bg-gray-100 border-r border-gray-300 z-[910] overflow-y-auto"
     >
-      <FuelsList :stations="stations" />
+      <FuelsList :stations="stations" :locationAllowed="locationAllowed" @selectStation="openStationPopup" />
     </div>
 
     <div
@@ -56,8 +56,14 @@ import { useToast } from 'vue-toastification'
 import L from 'leaflet'
 
 const { fuelId, searchRadius, currentPoint, selectedCity, radiusToZoom, setUserLocation } = useSearchParameters()
-const { map, initializeWithCoords, destroyMap } = useMap()
-const { stations, fetchStations } = useStations(fuelId)
+const { map, initializeWithCoords, destroyMap, setUserLocationAllowed, updateUserMarker } = useMap()
+const {
+  stations,
+  fetchStations,
+  locationAllowed,
+  openStationPopup,
+  setMap
+} = useStations(fuelId)
 
 const route = useRoute()
 const router = useRouter()
@@ -218,9 +224,12 @@ function initMapAndLocation() {
       const lat = pos.coords.latitude
       const lng = pos.coords.longitude
 
+      setUserLocationAllowed(true)
       setUserLocation({ lat, lng })
       initializeWithCoords(lat, lng, radiusToZoom(searchRadius.value))
+      updateUserMarker(lat, lng)
 
+      setMap(map.value)
       setTimeout(() => {
         map.value?.invalidateSize()
       }, 300)
@@ -231,6 +240,8 @@ function initMapAndLocation() {
       toast.info('Não foi possível obter sua localização. Ative a permissão de localização para exibir os postos próximos.')
 
       initializeWithCoords(-14.235, -51.9253, 4.5)
+
+      setMap(map.value)
 
       setTimeout(() => {
         map.value?.invalidateSize()
@@ -246,10 +257,15 @@ watch([fuelId, searchRadius], () => {
     onMapReady()
   }
 })
-watch(selectedCity, (newCity) => {
-  if (newCity && currentPoint.value) {
-    updateMapView(currentPoint.value, searchRadius.value)
+
+watch(currentPoint, (point) => {
+  if (!map.value) return
+
+  if (point) {
+    updateMapView(point, searchRadius.value)
     onMapReady()
+  } else {
+    initializeWithCoords(-14.235, -51.9253, 4.5)
   }
 })
 
@@ -282,6 +298,8 @@ onMounted(() => {
       currentPoint.value.lng,
       radiusToZoom(searchRadius.value)
     )
+
+    setMap(map.value)
 
     setTimeout(() => {
       map.value?.invalidateSize()

@@ -24,7 +24,8 @@
       <li
         v-for="station in sortedStations"
         :key="station.id"
-        class="mb-4 p-4 rounded-2xl shadow-sm bg-white hover:shadow-md transition"
+        @click="$emit('selectStation', station.id)"
+        class="mb-4 p-4 rounded-2xl shadow-sm bg-white hover:shadow-md transition cursor-pointer"
       >
         <div class="flex flex-col items-center gap-2 mb-2">
           <div class="flex justify-between items-center w-full">
@@ -79,6 +80,7 @@ const props = defineProps({
 })
 
 const sortOption = ref('price')
+const emit = defineEmits(['selectStation'])
 
 const sortedStations = computed(() => {
   const list = props.stations.filter(

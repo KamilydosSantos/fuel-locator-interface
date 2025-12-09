@@ -8,9 +8,13 @@ export function useStations(fuelIdRef) {
   const stations = ref([])
   const userLocation = ref(null)
   const locationAllowed = ref(false)
+  const mapRef = ref(null)
 
   const isMobile = () => window.innerWidth < 768
-
+  
+  const setMap = map => {
+    mapRef.value = map
+  }
   const getUserLocation = async () => {
     return new Promise((resolve, reject) => {
       if (!navigator.geolocation) {
@@ -145,6 +149,20 @@ export function useStations(fuelIdRef) {
     })
   }
 
+  const openStationPopup = stationId => {
+    const markerObj = markers.value.find(m => m.id === stationId)
+    if (!markerObj || !mapRef.value) return
+
+    const marker = markerObj.marker
+    const latLng = marker.getLatLng()
+
+    marker.openPopup()
+
+    mapRef.value.setView(latLng, Math.max(mapRef.value.getZoom(), 15), {
+      animate: true
+    })
+  }
+
   const fetchRouteDistance = async (user, station) => {
     try {
       const controller = new AbortController()
@@ -245,8 +263,10 @@ export function useStations(fuelIdRef) {
   return {
     markers,
     stations,
+    openStationPopup,
     fetchStations,
     clearMarkers,
-    locationAllowed
+    locationAllowed,
+    setMap
   }
 }

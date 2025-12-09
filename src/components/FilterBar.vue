@@ -22,14 +22,25 @@
         Cidade
       </label>
 
-      <input
-        type="text"
-        v-model="cityQuery"
-        @input="fetchCities"
-        class="w-full h-9 md:h-10 text-xs md:text-sm p-2 md:p-2.5 rounded-2xl bg-white text-gray-800
-               border border-gray-200 shadow-sm focus:outline-none"
-        placeholder="Digite o nome da cidade"
-      />
+      <div class="relative">
+        <input
+          type="text"
+          v-model="cityQuery"
+          @input="fetchCities"
+          class="w-full h-9 md:h-10 text-xs md:text-sm p-2 md:p-2.5 rounded-2xl bg-white text-gray-800
+                border border-gray-200 shadow-sm focus:outline-none"
+          placeholder="Digite o nome da cidade"
+        />
+        <button
+          v-if="cityQuery"
+          type="button"
+          @click="clearCity"
+          class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700"
+          aria-label="Limpar cidade"
+        >
+          ✕
+        </button>
+      </div>
 
       <ul
         v-if="cityOptions.length"
@@ -79,7 +90,7 @@ import { ref, onMounted } from 'vue';
 import { api } from '@/services/api.js';
 import { useSearchParameters } from '@/composables/useSearchParameters.js';
 
-const { fuelId, searchRadius, setSelectedCity, MIN_RADIUS, MAX_RADIUS, resetCity } = useSearchParameters();
+const { fuelId, searchRadius, selectedCity, setSelectedCity, userLocation, MIN_RADIUS, MAX_RADIUS, resetCity } = useSearchParameters();
 
 const fuels = ref([]);
 const cityQuery = ref('');
@@ -97,7 +108,6 @@ async function fetchFuels() {
 async function fetchCities() {
   if (!cityQuery.value) {
     cityOptions.value = [];
-    resetCity();
     return;
   }
 
@@ -117,8 +127,18 @@ function handleSelectCity(city) {
   cityOptions.value = [];
 }
 
+function clearCity() {
+  cityQuery.value = '';
+  cityOptions.value = [];
+  resetCity();
+}
+
 onMounted(() => {
   fetchFuels();
+
+  if (selectedCity.value) {
+    cityQuery.value = selectedCity.value.name;
+  }
 });
 
 </script>

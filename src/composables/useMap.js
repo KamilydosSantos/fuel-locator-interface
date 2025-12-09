@@ -4,6 +4,7 @@ import L from 'leaflet'
 export function useMap() {
   const map = ref(null)
   const userMarker = ref(null)
+  const userLocationAllowed = ref(false)
 
   const setupTileLayer = (instance) => {
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -16,7 +17,7 @@ export function useMap() {
 
     if (map.value && container) {
       map.value.setView([lat, lng], zoomLevel)
-      updateUserMarker(lat, lng)
+      if (userLocationAllowed.value) updateUserMarker(lat, lng)
       return
     }
 
@@ -31,11 +32,13 @@ export function useMap() {
     setupTileLayer(instance)
     map.value = instance
 
-    updateUserMarker(lat, lng)
+    if (userLocationAllowed.value) {
+      updateUserMarker(lat, lng)
+    }
   }
 
   const updateUserMarker = (lat, lng) => {
-    if (!map.value) return
+    if (!map.value || !userLocationAllowed.value) return
 
     if (userMarker.value) {
       userMarker.value.setLatLng([lat, lng])
@@ -51,10 +54,22 @@ export function useMap() {
     }).addTo(map.value)
   }
 
+  const setUserLocationAllowed = (allowed) => {
+    userLocationAllowed.value = allowed
+    if (!allowed && userMarker.value) {
+      userMarker.value.remove()
+      userMarker.value = null
+    }
+  }
+
   const destroyMap = () => {
     if (map.value) {
       map.value.remove()
       map.value = null
+    }
+
+    if (userMarker.value) {
+      userMarker.value.remove()
       userMarker.value = null
     }
   }
@@ -62,6 +77,8 @@ export function useMap() {
   return {
     map,
     initializeWithCoords,
-    destroyMap
+    destroyMap,
+    updateUserMarker,
+    setUserLocationAllowed
   }
 }
